@@ -24,6 +24,7 @@ def main() -> None:
     criterion = nn.MSELoss()
     optimizer = optim.Adam
     eval_every = 25
+    patch_size = 64 # 64 for X2, 32 for X4
 
     # Torch
     torch.manual_seed(seed)
@@ -35,9 +36,10 @@ def main() -> None:
     
     t91_lr, t91_gt = load_dataset(os.path.join(data_dir, "train", "T91", f"X{upscaling_factor}"), scales, angles)
     general100_lr, general100_gt = load_dataset(os.path.join(data_dir, "train", "General100", f"X{upscaling_factor}"), scales, angles)
-    x_train, y_train = get_patches(t91_lr + general100_lr, t91_gt + general100_gt, 64)
+    x_train, y_train = get_patches(t91_lr + general100_lr, t91_gt + general100_gt, patch_size=patch_size)
     x_train = [torch.tensor(img, dtype=torch.float32, device=device).unsqueeze(0) for img in x_train]
     y_train = [torch.tensor(img, dtype=torch.float32, device=device).unsqueeze(0) for img in y_train]
+    print(f"Number of training samples: {len(x_train)}")
                                
     bsd100_lr, bsd100_gt = load_dataset(os.path.join(data_dir, "validation", "BSD100", f"X{upscaling_factor}"))
     x_val = [torch.tensor(img, dtype=torch.float32, device=device).unsqueeze(0) for img in bsd100_lr]
@@ -48,6 +50,16 @@ def main() -> None:
                    d=d,
                    s=s,
                    m=m).to(device)
+    print(model)
+    print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
+
+    # Load model
+    model_dir = os.path.join("..", "models")
+    if os.path.exists(os.path.join(model_dir, "best_model.pt")):
+        checkpoint = torch.load(os.path.join(model_dir, "best_model.pt"))
+        model.load_state_dict(checkpoint["model_state_dict"])
+        print("Model loaded")
+
     train(model=model,
           x_train=x_train,
           y_train=y_train,

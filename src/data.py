@@ -84,6 +84,23 @@ def get_patches(lr_images: list[np.ndarray], gt_images: list[np.ndarray], patch_
     return lr_patches, gt_patches
 
 
+def load_eval_dataset(dataset_dir: str) -> tuple[list[np.ndarray], list[np.ndarray]]:
+    """
+    Load the dataset from the given directory.
+    :param dataset_dir (str): The path to the dataset directory.
+    """
+    lr_images = []
+    gt_images = []
+    for file in os.listdir(os.path.join(dataset_dir, "LR")):
+        lr_image = cv2.imread(os.path.join(dataset_dir, "LR", file))
+        gt_image = cv2.imread(os.path.join(dataset_dir, "GT", file))
+        lr_ycrcb = cv2.cvtColor(lr_image, cv2.COLOR_BGR2YCrCb)
+        gt_ycrcb = cv2.cvtColor(gt_image, cv2.COLOR_BGR2YCrCb)
+        lr_images.append(lr_ycrcb)
+        gt_images.append(gt_ycrcb)
+    return lr_images, gt_images
+
+
 if __name__ == "__main__":
     dataset = os.path.join("..", "data", "train", "General100", "X2")
     scales = [0.9, 0.8, 0.7, 0.6]
