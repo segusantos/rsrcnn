@@ -46,11 +46,11 @@ def evaluate_model(model: nn.Module,
 def main() -> None:
     # Hyperparameters
     upscaling_factor = 2
-    d = 32 # LR feature dimension (56 for best performance, 32 for real-time)
-    s = 5 # Number of shrinking filters (12 for best performance, 5 for real-time)
-    m = 1  # Mapping depth (4 for best performance, 1 for real-time)
+    d = 56 # LR feature dimension (56 for best performance, 32 for real-time)
+    s = 12 # Number of shrinking filters (12 for best performance, 5 for real-time)
+    m = 4  # Mapping depth (4 for best performance, 1 for real-time)
     criterion = nn.MSELoss()
-    model_name = "best_model_small_x2"
+    model_name = "best_model_big_x2"
 
     # Torch
     device = "cuda" if torch.cuda.is_available() else "cpu"
