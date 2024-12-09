@@ -3,47 +3,48 @@ import cv2
 import torch
 from torch import nn
 from torch import optim
+from torch.utils.data import DataLoader
 
-from data import load_dataset, get_patches
+from data import SRDataset
 from fsrcnn import FSRCNN
+from rsrcnn import RSRCNN
 from train import train
 
 
 def main() -> None:
     # Hyperparameters
     upscaling_factor = 2
-    d = 56 # LR feature dimension (56 for best performance, 32 for real-time)
-    s = 12 # Number of shrinking filters (12 for best performance, 5 for real-time)
-    m = 4  # Mapping depth (4 for best performance, 1 for real-time)
-    scales = [0.9, 0.8, 0.7, 0.6]
-    angles = [cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_180, cv2.ROTATE_90_COUNTERCLOCKWISE]
+    d = 56
+    s = 12
+    m = 4
     seed = 69
     epochs = 1000
-    batch_size = 64
+    batch_size = 128
     lr = 1e-3
     criterion = nn.MSELoss()
     optimizer = optim.Adam
     eval_every = 25
-    patch_size = 64 # 64 for X2, 32 for X4
+    patch_size = 64
+    model_name = "best_model_big_x2"
+    # train_datasets_names = ["DIV2K"]
+    train_datasets_names = ["T91", "General100"]
+    val_datasets_names = ["BSD100"]
 
     # Torch
     torch.manual_seed(seed)
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"Device: {device}")
 
     # Load datasets
     data_dir = os.path.join("..", "data")
     
-    t91_lr, t91_gt = load_dataset(os.path.join(data_dir, "train", "T91", f"X{upscaling_factor}"), scales, angles)
-    general100_lr, general100_gt = load_dataset(os.path.join(data_dir, "train", "General100", f"X{upscaling_factor}"), scales, angles)
-    x_train, y_train = get_patches(t91_lr + general100_lr, t91_gt + general100_gt, patch_size=patch_size)
-    x_train = [torch.tensor(img, dtype=torch.float32, device=device).unsqueeze(0) for img in x_train]
-    y_train = [torch.tensor(img, dtype=torch.float32, device=device).unsqueeze(0) for img in y_train]
-    print(f"Number of training samples: {len(x_train)}")
-                               
-    bsd100_lr, bsd100_gt = load_dataset(os.path.join(data_dir, "validation", "BSD100", f"X{upscaling_factor}"))
-    x_val = [torch.tensor(img, dtype=torch.float32, device=device).unsqueeze(0) for img in bsd100_lr]
-    y_val = [torch.tensor(img, dtype=torch.float32, device=device).unsqueeze(0) for img in bsd100_gt]
+    train_datasets_dirs = [os.path.join(data_dir, "train", dataset, f"X{upscaling_factor}_PS{patch_size}") for dataset in train_datasets_names]
+    train_dataset = SRDataset(train_datasets_dirs, upscaling_factor, device)
+
+    val_datasets_dirs = [os.path.join(data_dir, "validation", dataset, f"X{upscaling_factor}") for dataset in val_datasets_names]
+    val_dataset = SRDataset(val_datasets_dirs, upscaling_factor, device)
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     # Model
     model = FSRCNN(upscaling_factor=upscaling_factor,
@@ -51,25 +52,25 @@ def main() -> None:
                    s=s,
                    m=m).to(device)
     print(model)
+    print(f"Device: {device}")
+    print(f"Train dataset size: {len(train_dataset)}")
+    print(f"Validation dataset size: {len(val_dataset)}")
     print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
 
     # Load model
     model_dir = os.path.join("..", "models")
-    if os.path.exists(os.path.join(model_dir, "best_model.pt")):
-        checkpoint = torch.load(os.path.join(model_dir, "best_model.pt"))
+    if os.path.exists(os.path.join(model_dir, f"{model_name}.pt")):
+        checkpoint = torch.load(os.path.join(model_dir, f"{model_name}.pt"), weights_only=False)
         model.load_state_dict(checkpoint["model_state_dict"])
         print("Model loaded")
 
     train(model=model,
-          x_train=x_train,
-          y_train=y_train,
-          x_val=x_val,
-          y_val=y_val,
+          train_loader=train_loader,
+          val_loader=val_loader,
           criterion=criterion,
           optimizer=optimizer,
           lr=lr,
           epochs=epochs,
-          batch_size=batch_size,
           eval_every=eval_every)
 
 

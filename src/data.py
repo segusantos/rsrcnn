@@ -1,6 +1,9 @@
 import os
 import numpy as np
 import cv2
+import torch
+from torch.utils.data import Dataset
+from tqdm import tqdm
 
 
 def scale_image(image: np.ndarray,
@@ -101,12 +104,80 @@ def load_eval_dataset(dataset_dir: str) -> tuple[list[np.ndarray], list[np.ndarr
     return lr_images, gt_images
 
 
-if __name__ == "__main__":
-    dataset = os.path.join("..", "data", "train", "General100", "X2")
+def load_image(dataset_dir: str,
+               image_name: str) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Load the image from the given path
+        and apply the augmentation to it.
+    :param dataset_dir (str): The path to the dataset directory.
+    :param image_path (str): The path to the image.
+    :return (np.ndarray, np.ndarray): The low-resolution and ground-truth images.
+    """
+    lr_image = cv2.imread(os.path.join(dataset_dir, "LR", image_name))
+    gt_image = cv2.imread(os.path.join(dataset_dir, "GT", image_name))
+    lr_y = cv2.cvtColor(lr_image, cv2.COLOR_BGR2YCrCb)[:, :, 0]
+    gt_y = cv2.cvtColor(gt_image, cv2.COLOR_BGR2YCrCb)[:, :, 0]
+    return lr_y, gt_y
+
+
+class SRDataset(Dataset):
+    def __init__(self,
+                 dataset_dirs: list[str],
+                 upscaling_factor: int,
+                 device: str = "cuda") -> None:
+        self.dataset_dirs = dataset_dirs
+        self.upscaling_factor = upscaling_factor
+        self.device = device
+        self.file_list = [(dataset_dir, file_name)  for dataset_dir in dataset_dirs
+                                                    for file_name in os.listdir(os.path.join(dataset_dir, "LR"))]
+    
+    def __len__(self):
+        return len(self.file_list)
+    
+    def __getitem__(self, idx):
+        lr_image, gt_image = load_image(self.file_list[idx][0], self.file_list[idx][1])       
+        lr_tensor = torch.from_numpy(lr_image).to(dtype=torch.float32, device=self.device).unsqueeze(0)
+        gt_tensor = torch.from_numpy(gt_image).to(dtype=torch.float32, device=self.device).unsqueeze(0)
+        return lr_tensor, gt_tensor
+            
+
+def main() -> None:
+    # Hyperparameters
+    dataset_type = "train"
+    dataset_name = "DIV2K"
+    upscaling_factor = 4
     scales = [0.9, 0.8, 0.7, 0.6]
-    angles = [cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_180, cv2.ROTATE_90_COUNTERCLOCKWISE] 
-    x_train, y_train = load_dataset(dataset, scales, angles)
-    # x_test, y_test = load_dataset(dataset)
-    for i, (lr, gt) in enumerate(zip(x_train, y_train)):
-        cv2.imwrite(f"../data/aux/lr_{i + 1}.bmp", lr)
-        cv2.imwrite(f"../data/aux/gt_{i + 1}.bmp", gt)
+    angles = [cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_180, cv2.ROTATE_90_COUNTERCLOCKWISE]
+    patch_size = 240
+
+    # Build and save dataset
+    dataset_dir = os.path.join("..", "data", dataset_type, dataset_name, f"X{upscaling_factor}")
+    output_dir = os.path.join("..", "data", dataset_type, dataset_name, f"X{upscaling_factor}_PS{patch_size}")
+    
+    # Create output directories
+    os.makedirs(os.path.join(output_dir, "LR"), exist_ok=True)
+    os.makedirs(os.path.join(output_dir, "GT"), exist_ok=True)
+
+    patch_counter = 0
+    for file in tqdm(os.listdir(os.path.join(dataset_dir, "LR"))):
+        # Load single image pair
+        lr_image = cv2.imread(os.path.join(dataset_dir, "LR", file))
+        gt_image = cv2.imread(os.path.join(dataset_dir, "GT", file))
+        lr_y = cv2.cvtColor(lr_image, cv2.COLOR_BGR2YCrCb)[:, :, 0]
+        gt_y = cv2.cvtColor(gt_image, cv2.COLOR_BGR2YCrCb)[:, :, 0]
+
+        # Augment single image
+        lr_shapes, gt_shapes = get_shapes(lr_y.shape, gt_y.shape, scales)
+        lr_augmented = augment_image(lr_y, lr_shapes, angles)
+        gt_augmented = augment_image(gt_y, gt_shapes, angles)
+
+        # Get and save patches for this image
+        lr_patches, gt_patches = get_patches(lr_augmented, gt_augmented, patch_size)
+        for lr_patch, gt_patch in zip(lr_patches, gt_patches):
+            cv2.imwrite(os.path.join(output_dir, "LR", f"patch_{patch_counter}.png"), lr_patch)
+            cv2.imwrite(os.path.join(output_dir, "GT", f"patch_{patch_counter}.png"), gt_patch)
+            patch_counter += 1
+
+
+if __name__ == "__main__":
+    main()

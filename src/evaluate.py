@@ -6,6 +6,7 @@ from torch import nn
 
 from data import load_eval_dataset
 from fsrcnn import FSRCNN
+from rsrcnn import RSRCNN
 
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
@@ -50,7 +51,7 @@ def main() -> None:
     s = 12 # Number of shrinking filters (12 for best performance, 5 for real-time)
     m = 4  # Mapping depth (4 for best performance, 1 for real-time)
     criterion = nn.MSELoss()
-    model_name = "best_model_big_x2"
+    model_name = "best_model"
 
     # Torch
     device = "cuda" if torch.cuda.is_available() else "cpu"
