@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from data import load_eval_dataset
+from dataloader import load_dataset
 from fsrcnn import FSRCNN
 from rsrcnn import RSRCNN
 
@@ -60,8 +60,8 @@ def main() -> None:
     # Load dataset
     data_dir = os.path.join("..", "data")
     
-    set5_lr, set5_gt = load_eval_dataset(os.path.join(data_dir, "test", "Set5", f"X{upscaling_factor}"))
-    set14_lr, set14_gt = load_eval_dataset(os.path.join(data_dir, "test", "Set14", f"X{upscaling_factor}"))
+    set5_lr, set5_gt = load_dataset(os.path.join(data_dir, "test", "Set5", f"X{upscaling_factor}"))
+    set14_lr, set14_gt = load_dataset(os.path.join(data_dir, "test", "Set14", f"X{upscaling_factor}"))
     eval_lr = set5_lr # + set14_lr
     eval_gt = set5_gt # + set14_gt
     x_test = [torch.tensor(img[:, :, 0], dtype=torch.float32, device=device).unsqueeze(0) for img in eval_lr]

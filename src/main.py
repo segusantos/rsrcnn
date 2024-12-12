@@ -5,7 +5,7 @@ from torch import nn
 from torch import optim
 from torch.utils.data import DataLoader
 
-from data import SRDataset
+from dataloader import TrainDataset, ValDataset
 from fsrcnn import FSRCNN
 from rsrcnn import RSRCNN
 from train import train
@@ -19,13 +19,14 @@ def main() -> None:
     m = 4
     seed = 69
     epochs = 1000
-    batch_size = 128
+    batch_size = 32
     lr = 1e-3
     criterion = nn.MSELoss()
     optimizer = optim.Adam
-    eval_every = 25
-    patch_size = 64
-    model_name = "best_model_big_x2"
+    eval_every = 10
+    patch_size = 128
+    stride = 64
+    model_name = "best_model"
     # train_datasets_names = ["DIV2K"]
     train_datasets_names = ["T91", "General100"]
     val_datasets_names = ["BSD100"]
@@ -33,17 +34,17 @@ def main() -> None:
     # Torch
     torch.manual_seed(seed)
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"Device: {device}")
 
     # Load datasets
     data_dir = os.path.join("..", "data")
     
-    train_datasets_dirs = [os.path.join(data_dir, "train", dataset, f"X{upscaling_factor}_PS{patch_size}") for dataset in train_datasets_names]
-    train_dataset = SRDataset(train_datasets_dirs, upscaling_factor, device)
+    train_datasets_dirs = [os.path.join(data_dir, "train", dataset, f"X{upscaling_factor}_P{patch_size}_S{stride}") for dataset in train_datasets_names]
+    train_dataset = TrainDataset(train_datasets_dirs, upscaling_factor, device)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
     val_datasets_dirs = [os.path.join(data_dir, "validation", dataset, f"X{upscaling_factor}") for dataset in val_datasets_names]
-    val_dataset = SRDataset(val_datasets_dirs, upscaling_factor, device)
-
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_dataset = ValDataset(val_datasets_dirs, upscaling_factor, device)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     # Model
@@ -52,7 +53,6 @@ def main() -> None:
                    s=s,
                    m=m).to(device)
     print(model)
-    print(f"Device: {device}")
     print(f"Train dataset size: {len(train_dataset)}")
     print(f"Validation dataset size: {len(val_dataset)}")
     print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
