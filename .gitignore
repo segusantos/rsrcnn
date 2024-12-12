@@ -1,2 +1,8 @@
 # .gitignore
 /data/train/DIV2K
+
+__pycache__
+X2_P128_S64
+eval
+
+.png

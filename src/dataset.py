@@ -59,7 +59,7 @@ def get_lr_patches(patches: list[np.ndarray],
 def main() -> None:
     # Hyperparameters
     dataset_type = "train"
-    dataset_name = "T91"
+    dataset_name = "General100"
     upscaling_factor = 2
     scales = [0.9, 0.8, 0.7, 0.6]
     angles = [cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_180, cv2.ROTATE_90_COUNTERCLOCKWISE]
