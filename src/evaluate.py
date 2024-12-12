@@ -7,6 +7,7 @@ from torch import nn
 from dataloader import load_dataset
 from fsrcnn import FSRCNN
 from rsrcnn import RSRCNN
+from tsrcnn import TSRCNN
 
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
@@ -70,7 +71,7 @@ def main() -> None:
     # Load model
     model_dir = os.path.join("..", "models")
 
-    model = FSRCNN(upscaling_factor=upscaling_factor,
+    model = TSRCNN(upscaling_factor=upscaling_factor,
                    d=d,
                    s=s,
                    m=m).to(device)

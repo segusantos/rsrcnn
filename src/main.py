@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 from dataloader import TrainDataset, ValDataset
 from fsrcnn import FSRCNN
 from rsrcnn import RSRCNN
+from tsrcnn import TSRCNN
 from train import train
 
 
@@ -48,10 +49,11 @@ def main() -> None:
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     # Model
-    model = FSRCNN(upscaling_factor=upscaling_factor,
+    model = TSRCNN(upscaling_factor=upscaling_factor,
                    d=d,
                    s=s,
-                   m=m).to(device)
+                   m=m,
+                   ).to(device)
     print(model)
     print(f"Train dataset size: {len(train_dataset)}")
     print(f"Validation dataset size: {len(val_dataset)}")
