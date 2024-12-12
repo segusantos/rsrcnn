@@ -17,7 +17,7 @@ def main() -> None:
     d = 56
     s = 12
     m = 4
-    seed = 69
+    seed = 1337
     epochs = 1000
     batch_size = 32
     lr = 1e-3
