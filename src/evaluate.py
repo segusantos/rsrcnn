@@ -36,8 +36,8 @@ def evaluate_model(model: nn.Module,
         y[i] = y[i].unsqueeze(0)
         y_pred = model(x[i])
         loss += criterion(y_pred, y[i]).item()
-        y_pred_ = y_pred.cpu().numpy().clip(0, 255).astype("uint8")[0, 0, :, :]
-        y_ = y[i].cpu().numpy().clip(0, 255).astype("uint8")[0, 0, :, :]
+        y_pred_ = y_pred.cpu().numpy().clip(0, 255).round().astype("uint8")[0, 0, :, :]
+        y_ = y[i].cpu().numpy().clip(0, 255).round().astype("uint8")[0, 0, :, :]
         psnr_sum += psnr(y_pred_, y_)
         ssim_sum += ssim(y_pred_, y_)
         y_preds.append(y_pred_)

@@ -29,8 +29,8 @@ def estimate_loss(model: nn.Module,
     for x_batch, y_batch in data_loader:
         y_pred = model(x_batch)
         total_loss += criterion(y_pred, y_batch).item() * len(x_batch)
-        y_pred_np = y_pred.cpu().numpy()[:, 0].clip(0, 255).astype("uint8")
-        y_batch_np = y_batch.cpu().numpy()[:, 0].clip(0, 255).astype("uint8")
+        y_pred_np = y_pred.cpu().numpy()[:, 0].clip(0, 255).round().astype("uint8")
+        y_batch_np = y_batch.cpu().numpy()[:, 0].clip(0, 255).round().astype("uint8")
         total_psnr += sum(psnr(pred, true) for pred, true in zip(y_pred_np, y_batch_np))
         total_ssim += sum(ssim(pred, true) for pred, true in zip(y_pred_np, y_batch_np))
         total_samples += len(x_batch)

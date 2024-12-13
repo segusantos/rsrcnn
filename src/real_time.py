@@ -54,7 +54,7 @@ def main() -> None:
 
         # Predict
         with torch.no_grad():
-            frame_y_hr = model(frame_y).cpu().numpy().clip(0, 255).astype("uint8")[0, 0, :, :]
+            frame_y_hr = model(frame_y).cpu().numpy().clip(0, 255).round().astype("uint8")[0, 0, :, :]
 
         # Postprocess
         frame_crcb_hr = cv2.resize(frame_ycrcb[:, :, 1:], (frame_y_hr.shape[1], frame_y_hr.shape[0]), cv2.INTER_CUBIC)

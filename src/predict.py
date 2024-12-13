@@ -34,7 +34,7 @@ def evaluate_model(model: nn.Module,
     for i in range(0, len(x)):
         x[i] = x[i].unsqueeze(0)
         y_pred = model(x[i])
-        y_pred = y_pred.cpu().numpy().clip(0, 255).astype("uint8")[0, 0, :, :]
+        y_pred = y_pred.cpu().numpy().clip(0, 255).round().astype("uint8")[0, 0, :, :]
         y_preds.append(y_pred)
     model.train()
     return y_preds
