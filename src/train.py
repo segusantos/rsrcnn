@@ -100,5 +100,10 @@ def train(model: nn.Module,
                     "metrics": metrics,
                 }, os.path.join("..", "models", "best_model.pt"))
                 
-    torch.save(metrics, "training_metrics.pt")
+    torch.save({
+        "epoch": epoch,
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+        "metrics": metrics,
+    }, os.path.join("..", "models", "last_model.pt"))
     print("Training completed.")

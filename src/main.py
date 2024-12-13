@@ -8,7 +8,6 @@ from torch.utils.data import DataLoader
 from dataloader import TrainDataset, ValDataset
 from fsrcnn import FSRCNN
 from rsrcnn import RSRCNN
-from tsrcnn import TSRCNN
 from train import train
 
 
@@ -20,12 +19,12 @@ def main() -> None:
     m = 4
     seed = 1337
     epochs = 1000
-    batch_size = 32
+    batch_size = 64
     lr = 1e-3
     criterion = nn.MSELoss()
     optimizer = optim.Adam
     eval_every = 10
-    patch_size = 128
+    patch_size = 64
     stride = 64
     model_name = "best_model"
     # train_datasets_names = ["DIV2K"]
@@ -49,7 +48,7 @@ def main() -> None:
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     # Model
-    model = TSRCNN(upscaling_factor=upscaling_factor,
+    model = FSRCNN(upscaling_factor=upscaling_factor,
                    d=d,
                    s=s,
                    m=m,

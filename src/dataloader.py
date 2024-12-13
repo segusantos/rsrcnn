@@ -17,13 +17,13 @@ class TrainDataset(Dataset):
                                                     for file_name in os.listdir(os.path.join(dataset_dir, "LR"))]
     
     def __len__(self):
-        return len(self.file_list)
+        return 1000 # len(self.file_list)
     
     def __getitem__(self, idx):
         dataset_dir, file_name = self.file_list[idx]
         lr_image = cv2.imread(os.path.join(dataset_dir, "LR", file_name), cv2.IMREAD_GRAYSCALE)
         gt_image = cv2.imread(os.path.join(dataset_dir, "GT", file_name), cv2.IMREAD_GRAYSCALE)
-        lr_tensor = torch.from_numpy(lr_image).to(dtype=torch.float32, device=self.device).unsqueeze(0) / 255.0
+        lr_tensor = torch.from_numpy(lr_image).to(dtype=torch.float32, device=self.device).unsqueeze(0)
         gt_tensor = torch.from_numpy(gt_image).to(dtype=torch.float32, device=self.device).unsqueeze(0)
         return lr_tensor, gt_tensor
 
@@ -51,7 +51,7 @@ class ValDataset(Dataset):
 
         lr_image = cv2.resize(gt_image, (gt_image.shape[1] // self.upscaling_factor, gt_image.shape[0] // self.upscaling_factor), cv2.INTER_CUBIC)
 
-        lr_tensor = torch.from_numpy(lr_image).to(dtype=torch.float32, device=self.device).unsqueeze(0) / 255.0
+        lr_tensor = torch.from_numpy(lr_image).to(dtype=torch.float32, device=self.device).unsqueeze(0)
         gt_tensor = torch.from_numpy(gt_image).to(dtype=torch.float32, device=self.device).unsqueeze(0)
         return lr_tensor, gt_tensor
 

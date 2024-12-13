@@ -7,7 +7,6 @@ from torch import nn
 from dataloader import load_dataset
 from fsrcnn import FSRCNN
 from rsrcnn import RSRCNN
-from tsrcnn import TSRCNN
 
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
@@ -65,13 +64,13 @@ def main() -> None:
     set14_lr, set14_gt = load_dataset(os.path.join(data_dir, "test", "Set14", f"X{upscaling_factor}"))
     eval_lr = set5_lr # + set14_lr
     eval_gt = set5_gt # + set14_gt
-    x_test = [torch.tensor(img[:, :, 0], dtype=torch.float32, device=device).unsqueeze(0) / 255.0 for img in eval_lr]
+    x_test = [torch.tensor(img[:, :, 0], dtype=torch.float32, device=device).unsqueeze(0) for img in eval_lr]
     y_test = [torch.tensor(img[:, :, 0], dtype=torch.float32, device=device).unsqueeze(0) for img in eval_gt]
 
     # Load model
     model_dir = os.path.join("..", "models")
 
-    model = TSRCNN(upscaling_factor=upscaling_factor,
+    model = FSRCNN(upscaling_factor=upscaling_factor,
                    d=d,
                    s=s,
                    m=m).to(device)
