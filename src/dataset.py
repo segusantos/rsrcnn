@@ -8,7 +8,7 @@ def scale_image(image: np.ndarray,
                 scales: list[float]) -> list[np.ndarray]:
     scaled_images = [image]
     for scale in scales:
-        scaled_image = cv2.resize(image, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+        scaled_image = cv2.resize(image, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
         scaled_images.append(scaled_image)
     return scaled_images
 
@@ -51,7 +51,7 @@ def get_lr_patches(patches: list[np.ndarray],
     lr_patches = []
     for patch in patches:
         assert patch.shape[0] % upscaling_factor == 0 and patch.shape[1] % upscaling_factor == 0
-        lr_patch = cv2.resize(patch, (0, 0), fx=1/upscaling_factor, fy=1/upscaling_factor, interpolation=cv2.INTER_CUBIC)
+        lr_patch = cv2.resize(patch, (0, 0), fx=1/upscaling_factor, fy=1/upscaling_factor, interpolation=cv2.INTER_AREA)
         lr_patches.append(lr_patch)
     return lr_patches
 
@@ -59,12 +59,12 @@ def get_lr_patches(patches: list[np.ndarray],
 def main() -> None:
     # Hyperparameters
     dataset_type = "train"
-    dataset_name = "T91"
+    dataset_name = "General100"
     upscaling_factor = 2
     scales = [0.9, 0.8 , 0.7, 0.6]
     angles = [cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_180, cv2.ROTATE_90_COUNTERCLOCKWISE]
-    patch_size = 32
-    stride = 32
+    patch_size = 128
+    stride = 128
 
     # Build and save dataset
     dataset_dir = os.path.join("..", "data", dataset_type, dataset_name, "original")
