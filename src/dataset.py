@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 def scale_image(image: np.ndarray,
                 scales: list[float]) -> list[np.ndarray]:
-    scaled_images = []
+    scaled_images = [image]
     for scale in scales:
         scaled_image = cv2.resize(image, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
         scaled_images.append(scaled_image)
@@ -15,7 +15,7 @@ def scale_image(image: np.ndarray,
 
 def rotate_image(image: np.ndarray,
                  angles: list[int]) -> list[np.ndarray]:
-    rotated_images = []
+    rotated_images = [image]
     for angle in angles:
         rotated_image = cv2.rotate(image, angle)
         rotated_images.append(rotated_image)
@@ -59,12 +59,12 @@ def get_lr_patches(patches: list[np.ndarray],
 def main() -> None:
     # Hyperparameters
     dataset_type = "train"
-    dataset_name = "General100"
+    dataset_name = "T91"
     upscaling_factor = 2
-    scales = [0.9, 0.8, 0.7, 0.6]
+    scales = [0.9, 0.8 , 0.7, 0.6]
     angles = [cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_180, cv2.ROTATE_90_COUNTERCLOCKWISE]
-    patch_size = 128
-    stride = 64
+    patch_size = 32
+    stride = 32
 
     # Build and save dataset
     dataset_dir = os.path.join("..", "data", dataset_type, dataset_name, "original")
@@ -86,8 +86,8 @@ def main() -> None:
         lr_patches = get_lr_patches(patches, upscaling_factor)
 
         for patch, lr_patch in zip(patches, lr_patches):
-            cv2.imwrite(os.path.join(output_dir, "GT", f"patch_{patch_counter}.png"), patch)
-            cv2.imwrite(os.path.join(output_dir, "LR", f"patch_{patch_counter}.png"), lr_patch)
+            cv2.imwrite(os.path.join(output_dir, "GT", f"patch_{patch_counter}.bmp"), patch)
+            cv2.imwrite(os.path.join(output_dir, "LR", f"patch_{patch_counter}.bmp"), lr_patch)
             patch_counter += 1
 
 
