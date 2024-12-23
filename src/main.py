@@ -10,18 +10,23 @@ from fsrcnn import FSRCNN
 from rsrcnn import RSRCNN
 from train import train
 
+from loss import NPSNRLoss, CSSIMLoss
+
 
 def main() -> None:
     # Hyperparameters
-    upscaling_factor = 2
+    upscaling_factor = 4
     d = 56
     s = 12
-    m = 4
+    m = 5
     seed = 1337
+    n_train = 1000
     epochs = 1000
     batch_size = 64
     lr = 1e-3
-    criterion = nn.MSELoss()
+    # criterion = nn.MSELoss()
+    criterion = NPSNRLoss(data_range=255.0)
+    # criterion = CSSIMLoss(data_range=255.0)
     optimizer = optim.Adam
     eval_every = 10
     patch_size = 64
@@ -35,20 +40,21 @@ def main() -> None:
     torch.manual_seed(seed)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Device: {device}")
+    criterion.to(device)
 
     # Load datasets
     data_dir = os.path.join("..", "data")
     
     train_datasets_dirs = [os.path.join(data_dir, "train", dataset, f"X{upscaling_factor}_P{patch_size}_S{stride}") for dataset in train_datasets_names]
-    train_dataset = TrainDataset(train_datasets_dirs, upscaling_factor, device)
+    train_dataset = TrainDataset(train_datasets_dirs, upscaling_factor, n=n_train, device=device)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
     val_datasets_dirs = [os.path.join(data_dir, "validation", dataset, f"X{upscaling_factor}") for dataset in val_datasets_names]
-    val_dataset = ValDataset(val_datasets_dirs, upscaling_factor, device)
+    val_dataset = ValDataset(val_datasets_dirs, upscaling_factor, device=device)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     # Model
-    model = FSRCNN(upscaling_factor=upscaling_factor,
+    model = RSRCNN(upscaling_factor=upscaling_factor,
                    d=d,
                    s=s,
                    m=m,

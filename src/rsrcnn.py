@@ -18,15 +18,13 @@ class RSRCNN(nn.Module):
         # Feature extraction
         self.feature_extraction = nn.Sequential(
             nn.Conv2d(1, d, 5, padding="same"),
-            nn.BatchNorm2d(d),
-            nn.PReLU(d)
+            nn.PReLU(d),
         )
 
         # Shrinking
         self.shrinking = nn.Sequential(
             nn.Conv2d(d, s, 1),
-            nn.BatchNorm2d(s),
-            nn.PReLU(s)
+            nn.PReLU(s),
         )
 
         # Non-linear mapping with residual blocks
@@ -37,8 +35,7 @@ class RSRCNN(nn.Module):
         # Expanding
         self.expanding = nn.Sequential(
             nn.Conv2d(s, d, 1),
-            nn.BatchNorm2d(d),
-            nn.PReLU(d)
+            nn.PReLU(d),
         )
 
         # Deconvolution
@@ -79,7 +76,7 @@ class RSRCNN(nn.Module):
 
         # Deconvolution
         output = self.deconvolution(expanded_features)
-        
+
         return output
 
 

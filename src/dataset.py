@@ -59,34 +59,33 @@ def get_lr_patches(patches: list[np.ndarray],
 def main() -> None:
     # Hyperparameters
     dataset_type = "train"
-    dataset_name = "T91"
-    upscaling_factor = 4
-    scales = [0.9, 0.8 , 0.7, 0.6]
+    dataset_name = "General100"
+    upscaling_factor = 2
+    scales = [0.9, 0.8, 0.7, 0.6]
     angles = [cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_180, cv2.ROTATE_90_COUNTERCLOCKWISE]
     patch_size = 64
     stride = 64
 
     # Build and save dataset
-    dataset_dir = os.path.join("..", "data", dataset_type, dataset_name, "original")
+    dataset_dir = os.path.join(
+        "..", "data", dataset_type, dataset_name, "original")
     output_dir = os.path.join("..", "data", dataset_type, dataset_name, f"X{upscaling_factor}_P{patch_size}_S{stride}")
-    
+
     # Create output directories
     os.makedirs(os.path.join(output_dir, "LR"), exist_ok=True)
     os.makedirs(os.path.join(output_dir, "GT"), exist_ok=True)
 
     patch_counter = 0
     for file in tqdm(os.listdir(dataset_dir)):
-        # Load single image pair
         image = cv2.imread(os.path.join(dataset_dir, file), cv2.IMREAD_COLOR)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)[:, :, 0]
 
-        # Augment single image
         augmented_images = augment_image(image, scales, angles)
         patches = get_patches(augmented_images, patch_size, stride)
         lr_patches = get_lr_patches(patches, upscaling_factor)
 
         for patch, lr_patch in zip(patches, lr_patches):
-            cv2.imwrite(os.path.join(output_dir, "GT", f"patch_{patch_counter}.bmp"), patch)
+            cv2.imwrite(os.path.join(output_dir, "GT",f"patch_{patch_counter}.bmp"), patch)
             cv2.imwrite(os.path.join(output_dir, "LR", f"patch_{patch_counter}.bmp"), lr_patch)
             patch_counter += 1
 

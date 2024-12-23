@@ -9,9 +9,9 @@ class FSRCNN(nn.Module):
 
     def __init__(self,
                  upscaling_factor: int,
-                 d: int,  # LR feature dimension
-                 s: int,  # Number of shrinking filters
-                 m: int,  # Mapping depth
+                 d: int, # LR feature dimension
+                 s: int, # Number of shrinking filters
+                 m: int, # Mapping depth
                  ) -> None:
         super().__init__()
 

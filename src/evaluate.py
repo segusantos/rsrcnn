@@ -14,9 +14,9 @@ from skimage.metrics import structural_similarity as ssim
 
 @torch.no_grad()
 def evaluate_model(model: nn.Module,
-                  x: list[torch.Tensor],
-                  y: list[torch.Tensor],
-                  criterion: nn.Module) -> tuple[list[np.ndarray], float, float, float]:
+                   x: list[torch.Tensor],
+                   y: list[torch.Tensor],
+                   criterion: nn.Module) -> tuple[list[np.ndarray], float, float, float]:
     """
     Evaluate the model on the given data.
     :param model (nn.Module): The model to evaluate.
@@ -35,11 +35,11 @@ def evaluate_model(model: nn.Module,
         y[i] = y[i].unsqueeze(0)
         y_pred = model(x[i])
         loss += criterion(y_pred, y[i]).item()
-        y_pred_ = y_pred.cpu().numpy().clip(0, 255).round().astype("uint8")[0, 0, :, :]
-        y_ = y[i].cpu().numpy().clip(0, 255).round().astype("uint8")[0, 0, :, :]
-        psnr_sum += psnr(y_pred_, y_)
-        ssim_sum += ssim(y_pred_, y_)
-        y_preds.append(y_pred_)
+        y_pred_cpu = y_pred.clamp(0, 255).round().cpu().numpy().astype("uint8")[0, 0, :, :]
+        y_cpu = y[i].cpu().numpy().astype("uint8")[0, 0, :, :]
+        psnr_sum += psnr(y_cpu, y_pred_cpu, data_range=255.0)
+        ssim_sum += ssim(y_cpu, y_pred_cpu, data_range=255.0)
+        y_preds.append(y_pred_cpu)
     model.train()
     return y_preds, loss/len(x), psnr_sum/len(x), ssim_sum/len(x)
 
@@ -47,11 +47,11 @@ def evaluate_model(model: nn.Module,
 def main() -> None:
     # Hyperparameters
     upscaling_factor = 2
-    d = 56 # LR feature dimension (56 for best performance, 32 for real-time)
+    d = 56  # LR feature dimension (56 for best performance, 32 for real-time)
     s = 12 # Number of shrinking filters (12 for best performance, 5 for real-time)
     m = 4  # Mapping depth (4 for best performance, 1 for real-time)
     criterion = nn.MSELoss()
-    model_name = "best_model"
+    model_name = "rsrcnn_x2_npsnr"
 
     # Torch
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -59,18 +59,17 @@ def main() -> None:
 
     # Load dataset
     data_dir = os.path.join("..", "data")
-    
+
     set5_lr, set5_gt = load_dataset(os.path.join(data_dir, "test", "Set5", f"X{upscaling_factor}"))
     set14_lr, set14_gt = load_dataset(os.path.join(data_dir, "test", "Set14", f"X{upscaling_factor}"))
-    eval_lr = set5_lr # + set14_lr
-    eval_gt = set5_gt # + set14_gt
-    x_test = [torch.tensor(img[:, :, 0], dtype=torch.float32, device=device).unsqueeze(0) for img in eval_lr]
+    eval_lr, eval_gt = set5_lr + set14_lr, set5_gt + set14_gt
+    x_test = [torch.tensor(img[:, :, 0], dtype=torch.float32, device=device).unsqueeze(0) / 255.0 for img in eval_lr]
     y_test = [torch.tensor(img[:, :, 0], dtype=torch.float32, device=device).unsqueeze(0) for img in eval_gt]
 
     # Load model
     model_dir = os.path.join("..", "models")
 
-    model = FSRCNN(upscaling_factor=upscaling_factor,
+    model = RSRCNN(upscaling_factor=upscaling_factor,
                    d=d,
                    s=s,
                    m=m).to(device)

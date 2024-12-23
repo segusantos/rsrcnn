@@ -65,6 +65,12 @@ def main() -> None:
         cv2.putText(frame_hr, f'FPS: {fps}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 
                     1, (0, 255, 0), 2, cv2.LINE_AA)
 
+        # Put resolution text on frame
+        cv2.putText(frame, f'Original: {frame.shape[1]}x{frame.shape[0]}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 
+                    1, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.putText(frame_hr, f'Super Resolution: {frame_hr.shape[1]}x{frame_hr.shape[0]}', (10, 60), cv2.FONT_HERSHEY_SIMPLEX,
+                    1, (0, 255, 0), 2, cv2.LINE_AA)
+
         # Display both frames
         cv2.imshow("Original", frame)
         cv2.imshow("Super Resolution", frame_hr)
