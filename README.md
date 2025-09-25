@@ -2,20 +2,22 @@
 
 <div align="center">
 
-![Comparison Results](figures/comparison_x2_14.pdf)
-![Comparison Results](figures/comparison_x2_3.pdf)
+![Comparison Results](figures/comparison_x2_3.png)
+![Comparison Results](figures/comparison_x2_14.png)
 
-*Visual comparison of super-resolution results showing Low Resolution (LR), Bicubic interpolation, FSRCNN, RSRCNN, and Ground Truth (GT) images*
+*Visual comparison of x2 super-resolution results showing Ground Truth, Bicubic Interpolation, FSRCNN and RSRCNN images*
 
 </div>
 
-This repository contains the implementation of the Residual Super-Resolution Convolutional Neural Network (RSRCNN), as well as the baseline Fast Super-Resolution Convolutional Neural Network (FSRCNN) model, introduced in the paper [Accelerating the Super-Resolution Convolutional Neural Network](https://arxiv.org/abs/1608.00367).
+This repository contains the implementation of the **Residual Super-Resolution Convolutional Neural Network (RSRCNN)**, as well as the baseline **Fast Super-Resolution Convolutional Neural Network (FSRCNN)** model, introduced in the paper [Accelerating the Super-Resolution Convolutional Neural Network](https://arxiv.org/abs/1608.00367).
 
 RSRCNN builds upon the FSRCNN architecture by replacing the non-linear mapping layer with a residual block and adding skip connections, improving performance in image super-resolution tasks.
 
 The models are implemented in PyTorch and trained on standard datasets such as DIV2K, T91, General100, and BSD100. The repository includes trained weights for both FSRCNN and RSRCNN models at x2 and x4 upscaling factors.
 
 Moreover, this work explores the impact of different loss functions to the default MSE loss on super-resolution performance. In particular, it introduces Negative PSNR and Complementary SSIM (CSSIM) losses, which are designed to better align the training objective with perceptual image quality and yield improved results in terms of PSNR and SSIM metrics.
+
+The full paper and poster can be found in the [docs](docs) directory.
 
 ## Usage
 
@@ -33,7 +35,7 @@ The repository includes scripts for training both the baseline FSRCNN and the RS
   uv run -m scripts.dataset
   ```
 
-- Train a model:
+- Train a model with a specified architecture, size, upscaling factor and loss function:
 
   ```bash
   uv run -m scripts.train

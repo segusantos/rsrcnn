@@ -78,6 +78,7 @@ def main() -> None:
         # ensure inset background is transparent
         iax.patch.set_alpha(0.0)
 
+    plt.savefig(os.path.join("figures", f"comparison_x{upscaling_factor}_{image_number}.png"), bbox_inches="tight")
     plt.savefig(os.path.join("figures", f"comparison_x{upscaling_factor}_{image_number}.pdf"), bbox_inches="tight")
 
 
