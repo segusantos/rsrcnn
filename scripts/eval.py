@@ -17,7 +17,7 @@ def main() -> None:
     s = 12 # Number of shrinking filters (12 for best performance, 5 for real-time)
     m = 4  # Mapping depth (4 for best performance, 1 for real-time)
     criterion = nn.MSELoss()
-    model_name = "rsrcnn_x2_npsnr"
+    model_name = "rsrcnn_x2_cssim"
 
     # Torch
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -57,9 +57,9 @@ def main() -> None:
         pred_bgr = cv2.cvtColor(pred_ycrcb, cv2.COLOR_YCrCb2BGR)
         lr_bgr = cv2.cvtColor(lr, cv2.COLOR_YCrCb2BGR)
         gt_bgr = cv2.cvtColor(gt, cv2.COLOR_YCrCb2BGR)
-        cv2.imwrite(os.path.join(output_path, f"bicubic_{i + 1}.png"), bicubic_bgr)
-        cv2.imwrite(os.path.join(output_path, f"pred_{i + 1}.png"), pred_bgr)
-        cv2.imwrite(os.path.join(output_path, f"lr_{i + 1}.png"), lr_bgr)
+        cv2.imwrite(os.path.join(output_path, f"bicubic_x{upscaling_factor}_{i + 1}.png"), bicubic_bgr)
+        cv2.imwrite(os.path.join(output_path, f"{model_name}_{i + 1}.png"), pred_bgr)
+        cv2.imwrite(os.path.join(output_path, f"lr_x{upscaling_factor}_{i + 1}.png"), lr_bgr)
         cv2.imwrite(os.path.join(output_path, f"gt_{i + 1}.png"), gt_bgr)
 
 

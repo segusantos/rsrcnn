@@ -48,7 +48,8 @@ def train(model: nn.Module,
           optimizer: optim.Optimizer,
           lr: float,
           epochs: int,
-          eval_every: int = 10) -> None:
+          eval_every: int = 10,
+          model_name: str = "best_model") -> None:
     """
     Train the model with the given hyperparameters.
     :param model (nn.Module): The model to train.
@@ -59,6 +60,7 @@ def train(model: nn.Module,
     :param lr (float): The learning rate.
     :param epochs (int): The number of epochs.
     :param eval_every (int): The number of epochs to evaluate the model.
+    :param model_name (str): The name of the model to save.
     """
     model.train()
     optimizer = optimizer(model.parameters(), lr=lr)
@@ -105,12 +107,12 @@ def train(model: nn.Module,
                     "model_state_dict": model.state_dict(),
                     "optimizer_state_dict": optimizer.state_dict(),
                     "metrics": metrics,
-                }, os.path.join("models", "best_model.pt"))
+                }, os.path.join("models", f"{model_name}.pt"))
 
     torch.save({
         "epoch": epoch,
         "model_state_dict": model.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
         "metrics": metrics,
-    }, os.path.join("models", "last_model.pt"))
+    }, os.path.join("models", f"{model_name}.pt"))
     print("Training completed.")

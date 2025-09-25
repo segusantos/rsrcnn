@@ -12,23 +12,23 @@ from src.train import train
 
 def main() -> None:
     # Hyperparameters
-    upscaling_factor = 4
+    upscaling_factor = 2
     d = 56
     s = 12
-    m = 5
+    m = 4
     seed = 1337
     n_train = 1000
     epochs = 1000
     batch_size = 64
     lr = 1e-3
     # criterion = nn.MSELoss()
-    criterion = NPSNRLoss(data_range=255.0)
-    # criterion = CSSIMLoss(data_range=255.0)
+    # criterion = NPSNRLoss(data_range=255.0)
+    criterion = CSSIMLoss(data_range=255.0)
     optimizer = optim.Adam
     eval_every = 10
     patch_size = 64
     stride = 64
-    model_name = "best_model"
+    model_name = "rsrcnn_x2_cssim"
     # train_datasets_names = ["DIV2K"]
     train_datasets_names = ["T91", "General100"]
     val_datasets_names = ["BSD100"]
@@ -75,7 +75,8 @@ def main() -> None:
           optimizer=optimizer,
           lr=lr,
           epochs=epochs,
-          eval_every=eval_every)
+          eval_every=eval_every,
+          model_name=model_name)
 
 
 if __name__ == "__main__":
