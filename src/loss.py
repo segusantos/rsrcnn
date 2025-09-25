@@ -20,15 +20,3 @@ class NPSNRLoss(nn.Module):
 
     def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
         return -psnr(y_pred, y_true, data_range=self.data_range)
-
-
-def main() -> None:
-    loss = CSSIMLoss()
-    y_pred = torch.rand(4, 3, 32, 32)
-    y_true = torch.rand(4, 3, 32, 32)
-    output = loss(y_pred, y_true)
-    print(output)
-
-
-if __name__ == "__main__":
-    main()

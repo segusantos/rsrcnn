@@ -56,25 +56,15 @@ def get_lr_patches(patches: list[np.ndarray],
     return lr_patches
 
 
-def main() -> None:
-    # Hyperparameters
-    dataset_type = "train"
-    dataset_name = "General100"
-    upscaling_factor = 2
-    scales = [0.9, 0.8, 0.7, 0.6]
-    angles = [cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_180, cv2.ROTATE_90_COUNTERCLOCKWISE]
-    patch_size = 64
-    stride = 64
-
-    # Build and save dataset
-    dataset_dir = os.path.join(
-        "..", "data", dataset_type, dataset_name, "original")
-    output_dir = os.path.join("..", "data", dataset_type, dataset_name, f"X{upscaling_factor}_P{patch_size}_S{stride}")
-
-    # Create output directories
-    os.makedirs(os.path.join(output_dir, "LR"), exist_ok=True)
+def build_sr_dataset(dataset_dir: str,
+                     output_dir: str,
+                     upscaling_factor: int,
+                     scales: list[float],
+                     angles: list[int],
+                     patch_size: int,
+                     stride: int) -> None:
     os.makedirs(os.path.join(output_dir, "GT"), exist_ok=True)
-
+    os.makedirs(os.path.join(output_dir, "LR"), exist_ok=True)
     patch_counter = 0
     for file in tqdm(os.listdir(dataset_dir)):
         image = cv2.imread(os.path.join(dataset_dir, file), cv2.IMREAD_COLOR)
@@ -88,7 +78,3 @@ def main() -> None:
             cv2.imwrite(os.path.join(output_dir, "GT",f"patch_{patch_counter}.bmp"), patch)
             cv2.imwrite(os.path.join(output_dir, "LR", f"patch_{patch_counter}.bmp"), lr_patch)
             patch_counter += 1
-
-
-if __name__ == "__main__":
-    main()
