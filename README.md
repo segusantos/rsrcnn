@@ -21,7 +21,7 @@ The full paper and poster can be found in the [docs](docs) directory.
 
 ## Usage
 
-The repository includes scripts for training both the baseline FSRCNN and the RSRCNN models, evaluating their performance, visualizing results and testing them in real-time using a webcam. The project uses `uv` for dependency management.
+The repository includes scripts for training both the baseline FSRCNN and the RSRCNN models, evaluating their performance, visualizing results and testing them in real-time using a webcam. The project uses [uv](https://docs.astral.sh/uv) for dependency management.
 
 - Install the required dependencies:
 
